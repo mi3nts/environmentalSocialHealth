@@ -15,13 +15,14 @@ import xarray as xr
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import shap
+import re
 
-root = "./CAMS/"
-units = "../csv/CAMS_units.csv"
-zip_2010 = "./tx_texas_zip_codes_geo.min.json"
+root = "../CAMS/"
+units = "../assets/CAMS_units.csv"
+zip_2010 = "../assets/tx_texas_zip_codes_geo.min.json"
 hospital_data = "/media/teamlary/ssd/Discharge Data/Inpatient/Data/"
-census_dir = "./Census/"
-icd_data = "./icd10/"
+census_dir = "../Census/"
+icd_data = "../icd10/"
 
 tx_zip = gpd.read_file(zip_2010)
 
@@ -87,6 +88,8 @@ nice_names['pm2p5'] = 'Particulate matter 2.5um'
 
 env_data = env_data.copy().dropna(axis=1, how='all')
 env_data = env_data.dropna()
+
+print("\n\n Environmental data processed. \n\n")
 
 quarter_label = dict(zip(env_quarters, [i.upper() for i in icd9_subset + icd10_subset]))
 
@@ -388,4 +391,6 @@ icd_code_labels = {
 
 icd_codes = ['I5042', 'A4189', 'I509', 'I2510','F209','G309', 'J4521']
 icd_codes_subset = list(icd_code_labels.keys())[:1]
+
+print("Creating Models... \n\n")
 data_for_icd = getDF(icd_codes_subset)
