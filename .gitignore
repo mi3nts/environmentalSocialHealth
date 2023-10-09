@@ -1,3 +1,4 @@
 *.csv
 assets/tx_texas_zip_codes_geo.min.json
 pandas/Plots
+!assets/ICDCodes_expanded.csv
