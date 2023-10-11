@@ -270,14 +270,14 @@ def getDF(icd_codes):
         # "chnk", \
         X = data_quality.loc[:,["d2m","t2m", "lai_hv","lai_lv", 
         "pm10","pm2p5","stl1",
-        #"sp",
-        "co", # "aermr04","aermr05","aermr06", 
+        "sp",
+        "co", "aermr04","aermr05","aermr06", 
         "c2h6","hcho","aermr09","aermr07","aermr10",
-        "aermr08","oh", #"c5h8", #"ch4_c",
+        "aermr08","oh", "c5h8", "ch4_c",
         "hno3","no2","no","go3","pan",
-        "c3h8", #"aermr01","aermr02","aermr03",
+        "c3h8", "aermr01","aermr02","aermr03",
         "aermr12",
-        # "aermr11",
+        "aermr11",
         "so2"]] #, "pop_density"]] # including only relevant environmental data
         # "median household income", \
         # "hispanic",

@@ -1,0 +1,14 @@
+ICD,train_r2,test_r2,rmse,numDataPoints,code_category,code_label
+A419,0.7854398292968554,0.6294192335987419,0.2103288907865681,66982,Infectious and Parasitic Diseases,"Sepsis, unspecified organism"
+J189,0.8207988499099808,0.6247502537089715,0.2195214962044329,65312,Diseases of the Respiratory System,"Pneumonia, unspecified organism"
+I5023,0.7612519116920795,0.5894580958215991,0.2519081228687622,46599,Diseases of the Circulatory System,Acute on chronic systolic (congestive) heart failure
+I2510,0.8286516980125807,0.6682818525575087,0.2275713192296703,45743,Diseases of the Circulatory System,Atherosclerotic heart disease of native coronary artery without angina pectoris
+O80,0.7611449224453034,0.5438284980426711,0.2026419721438667,44662,"Pregnancy, Childbirth, and the Puerperium",Encounter for full-term uncomplicated delivery
+I5033,0.7598219901026871,0.61322935564578,0.2573319966686894,42329,Diseases of the Circulatory System,Acute on chronic diastolic (congestive) heart failure
+I5043,0.8260277191192521,0.6519380102286754,0.2524710732503457,34210,Diseases of the Circulatory System,Acute on chronic combined systolic (congestive) and diastolic (congestive) heart failure
+I5021,0.7685444801811381,0.620482119033956,0.260847845524923,30385,Diseases of the Circulatory System,Acute systolic (congestive) heart failure
+I5031,0.8126974827553209,0.6422776297592023,0.2526763820664375,30088,Diseases of the Circulatory System,Acute diastolic (congestive) heart failure
+I5030,0.7115603172461277,0.5190008344224346,0.2892901095857689,29620,Diseases of the Circulatory System,Unspecified diastolic (congestive) heart failure
+I509,0.8521243601413262,0.6236430665982118,0.2498576234238835,28974,Diseases of the Circulatory System,"Heart failure, unspecified"
+I5022,0.8043248809872906,0.6078762863864502,0.257342197363311,28361,Diseases of the Circulatory System,Chronic systolic (congestive) heart failure
+E860,0.7845584314311319,0.5769169122074318,0.2260253523301054,24355,"Endocrine, Nutritional, and Metabolic Diseases",Dehydration

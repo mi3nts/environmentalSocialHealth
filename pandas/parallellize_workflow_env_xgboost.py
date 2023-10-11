@@ -21,6 +21,7 @@ import time
 import shap
 import re
 from statsmodels.graphics.gofplots import qqplot_2samples
+import simple_icd_10_cm as cm
 
 
 root = "../CAMS/"
@@ -28,7 +29,15 @@ units = "../assets/CAMS_units.csv"
 zip_2010 = "../assets/tx_texas_zip_codes_geo.min.json"
 hospital_data = "/media/teamlary/ssd/Discharge Data/Inpatient/Data/"
 census_dir = "../Census/"
-icd_data = "../icd10_total_pandas/"
+
+pandas_or_polars = False
+
+if pandas_or_polars:
+    icd_data = "../icd10_pandas/"
+    save_dir = 'pandas'
+else:
+    icd_data = '../icd10_polars/'
+    save_dir = 'polars'
 
 tx_zip = gpd.read_file(zip_2010)
 
@@ -236,7 +245,7 @@ def plot_qq(full_pdf, save_path):
 #     plt.title(f'SHAP Values') 
 #     plt.show()
 nthresh = 3
-os.makedirs(f"./Results_nthresh_{nthresh}", exist_ok=True)
+os.makedirs(f"../Results_nthresh_{nthresh}_{save_dir}", exist_ok=True)
 
 def getDF(icd_codes): # this is the parallel function
     fits_data = []
@@ -279,7 +288,7 @@ def getDF(icd_codes): # this is the parallel function
         data_quality.replace([np.inf, -np.inf], np.nan, inplace=True)
         data_quality = data_quality.dropna(axis=0)
         if len(data_quality) > 10_000:
-            os.makedirs(f'./Plots/{icd_code}', exist_ok=True)
+            os.makedirs(f'../Plots_{save_dir}/{icd_code}', exist_ok=True)
         else:
             continue
         # print(data_quality.columns)
@@ -348,8 +357,12 @@ def getDF(icd_codes): # this is the parallel function
         # -----------
 
         # Get feature importances
-
-        icd_code_title = icd_code
+        if cm.is_valid_item(icd_code):
+            icd_code_title = cm.get_description(icd_code)
+        else: 
+            icd_code_title = icd_code
+# [cm.get_description(i) if cm.is_valid_item(i) else "Unknown Code" for i in list(results_df.ICD)]
+#         icd_code_title = [cm.get_description]
         # y_pred = model.predict(X_test_scaled)
         # r2_scores = r2_score(y_test, y_pred)
         # train_preds = model.predict(X_train_scaled)
@@ -364,7 +377,7 @@ def getDF(icd_codes): # this is the parallel function
         # print('full pdf', len(full_pdf))
         test_train_plot(full_pdf, y_test, train_r2, y_train, X_train_scaled, test_r2, X_test_scaled,
                         title=f"ICD-10 Codes for {icd_code_title} \n # threshold = {nthresh}, Environmental data \n from {start_year} to {end_year-1}",
-                        save_path=f'./Plots/{icd_code}/{icd_code}_r2.png'
+                        save_path=f'../Plots_{save_dir}/{icd_code}/{icd_code}_r2.png'
                         )
 
         
@@ -395,11 +408,11 @@ def getDF(icd_codes): # this is the parallel function
         # shap_plots(model, X_test)
         shap_plots(model, 
             X_test, 
-            f'./Plots/{icd_code}/{icd_code}_shap.png', 
+            f'../Plots_{save_dir}/{icd_code}/{icd_code}_shap.png', 
             title=f"SHAP Values for {icd_code_title}")
 
 
-        plot_qq(full_pdf, f'./Plots/{icd_code}/{icd_code}_qq.png')
+        plot_qq(full_pdf, f'../Plots_{save_dir}/{icd_code}/{icd_code}_qq.png')
 
         del full_pdf, df
 
@@ -416,6 +429,7 @@ def getDF(icd_codes): # this is the parallel function
 num_workers = multiprocessing.cpu_count()
 icd_codes = [i for i in os.listdir(icd_data)]
 # icd_codes = icd_codes[:54]
+os.makedirs(f'../Results_nthresh_{nthresh}_{save_dir}', exist_ok=True)
     
 for i in range(42): # change these hard coded numbers 
 
@@ -435,7 +449,7 @@ for i in range(42): # change these hard coded numbers
         # print(result)
         if len(result) > 0:
             result.columns = ['ICD', 'train_r2', 'test_r2', 'rmse', 'numDataPoints']
-            result.to_csv(f"./Results_nthresh_{nthresh}/multiprocess_df_{i}.csv")
+            result.to_csv(f"../Results_nthresh_{nthresh}_{save_dir}/multiprocess_df_{i}.csv")
 
 
 
