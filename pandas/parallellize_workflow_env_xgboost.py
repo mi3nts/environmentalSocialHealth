@@ -28,7 +28,7 @@ units = "../assets/CAMS_units.csv"
 zip_2010 = "../assets/tx_texas_zip_codes_geo.min.json"
 hospital_data = "/media/teamlary/ssd/Discharge Data/Inpatient/Data/"
 census_dir = "../Census/"
-icd_data = "../icd10/"
+icd_data = "../icd10_total_pandas/"
 
 tx_zip = gpd.read_file(zip_2010)
 
@@ -242,6 +242,7 @@ def getDF(icd_codes): # this is the parallel function
     fits_data = []
 
     for icd_code in icd_codes:
+        #print(icd_code)
         df = pd.DataFrame()
         for quarter in hospital_quarters[:-1]: # [:-1] to avoid 2022q1 
 
@@ -263,7 +264,6 @@ def getDF(icd_codes): # this is the parallel function
 
             df = pd.concat([df, full_df])
 
-        os.makedirs(f'./Plots/{icd_code}', exist_ok=True)
 
         data = df.copy()
         data_quality = data.reset_index(drop=True)
@@ -278,7 +278,9 @@ def getDF(icd_codes): # this is the parallel function
 
         data_quality.replace([np.inf, -np.inf], np.nan, inplace=True)
         data_quality = data_quality.dropna(axis=0)
-        if len(data_quality) < 2000:
+        if len(data_quality) > 10_000:
+            os.makedirs(f'./Plots/{icd_code}', exist_ok=True)
+        else:
             continue
         # print(data_quality.columns)
         # print(len(data_quality))
@@ -290,14 +292,14 @@ def getDF(icd_codes): # this is the parallel function
         # "chnk", \
         X = data_quality.loc[:,["d2m","t2m", "lai_hv","lai_lv", 
             "pm10","pm2p5","stl1",
-            #"sp",
-            "co", # "aermr04","aermr05","aermr06", 
+            "sp",
+            "co", "aermr04","aermr05","aermr06", 
             "c2h6","hcho","aermr09","aermr07","aermr10",
-            "aermr08","oh", #"c5h8", #"ch4_c",
+            "aermr08","oh", "c5h8", "ch4_c",
             "hno3","no2","no","go3","pan",
-            "c3h8", #"aermr01","aermr02","aermr03",
+            "c3h8", "aermr01","aermr02","aermr03",
             "aermr12",
-            # "aermr11",
+            "aermr11",
             "so2"]]# "median household income", \
         # "hispanic",
         # # "aggregate income",\
@@ -431,9 +433,9 @@ for i in range(42): # change these hard coded numbers
         # print(zip_olist)
         result = pd.DataFrame([i[0] for i in zip_olist if len(i) > 0])
         # print(result)
-        result.columns = ['ICD', 'train_r2', 'test_r2', 'rmse', 'numDataPoints']
-        
-        result.to_csv(f"./Results_nthresh_{nthresh}/multiprocess_df_{i}.csv")
+        if len(result) > 0:
+            result.columns = ['ICD', 'train_r2', 'test_r2', 'rmse', 'numDataPoints']
+            result.to_csv(f"./Results_nthresh_{nthresh}/multiprocess_df_{i}.csv")
 
 
 
