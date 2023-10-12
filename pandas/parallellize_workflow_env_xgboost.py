@@ -22,6 +22,7 @@ import shap
 import re
 from statsmodels.graphics.gofplots import qqplot_2samples
 import simple_icd_10_cm as cm
+import textwrap
 
 
 root = "../CAMS/"
@@ -196,7 +197,7 @@ def shap_plots(model, X_test, save_path, title):
     shap_values = explainer.shap_values(X_test)
     
     # plt.figure(figsize=(18,12))
-    shap.summary_plot(shap_values, X_test, plot_type='dot', max_display=10, show=False, plot_size=[16,8])
+    shap.summary_plot(shap_values, X_test, plot_type='dot', max_display=20, show=False, plot_size=[16,8])
     # print('part2')
     # fig, ax = plt.gcf(), plt.gca()
     feature_order = np.argsort(np.sum(np.abs(shap_values), axis=0))
@@ -338,17 +339,17 @@ def getDF(icd_codes): # this is the parallel function
         y_train_scaled = target_scaler.fit_transform(y_train.to_numpy().reshape(-1,1))
         y_test_scaled = target_scaler.transform(y_test.to_numpy().reshape(-1,1))
 
-        # model = RandomForestRegressor()
-        # # model = GradientBoostingRegressor()
+        model_rf = RandomForestRegressor()
+        # model = GradientBoostingRegressor()
 
-        # # model = ExtraTreesRegressor()
+        # model = ExtraTreesRegressor()
 
-        # # Train and predict using each model
+        # Train and predict using each model
         # predictions = {}
-        # # for model_name, model in models.items():
-        # # print('X_train', len(X_train_scaled), ' y_test', len(y_test))
-        # model.fit(X_train_scaled, y_train)
-        # y_pred = model.predict(X_test_scaled)
+        # for model_name, model in models.items():
+        # print('X_train', len(X_train_scaled), ' y_test', len(y_test))
+        model_rf.fit(X_train_scaled, y_train)
+        # y_pred = model_rf.predict(X_test_scaled)
 
         # r2_scores = r2_score(y_test, y_pred)
         # print(r2_scores)
@@ -376,40 +377,39 @@ def getDF(icd_codes): # this is the parallel function
         # print('full pdf', len(full_pdf))
         # print('full pdf', len(full_pdf))
         test_train_plot(full_pdf, y_test, train_r2, y_train, X_train_scaled, test_r2, X_test_scaled,
-                        title=f"ICD-10 Codes for {icd_code_title} \n # threshold = {nthresh}, Environmental data \n from {start_year} to {end_year-1}",
+                        title=textwrap.fill(f"ICD-10 Codes for {icd_code_title} \n # threshold = {nthresh}, \
+                        Environmental data \n from {start_year} to {end_year-1}"),
                         save_path=f'../Plots_{save_dir}/{icd_code}/{icd_code}_r2.png'
                         )
 
         
         
-        # importance_scores = model.feature_importances_
-        # feature_names = [nice_names[i] for i in X.columns]
-        # # feature_names = X.columns
+        importance_scores = model_rf.feature_importances_
+        feature_names = [nice_names[i] for i in X.columns]
+        # feature_names = X.columns
 
-        # # Sort feature importances in descending order
-        # indices = importance_scores.argsort()[::-1][:20]
-        # sorted_feature_names = ([feature_names[i] for i in indices])
-        # sorted_importance_scores = (importance_scores[indices])
+        # Sort feature importances in descending order
+        indices = importance_scores.argsort()[::-1][:20]
+        sorted_feature_names = ([feature_names[i] for i in indices])
+        sorted_importance_scores = (importance_scores[indices])
 
-        # # Create a horizontal bar chart of feature importances
-        # plt.figure(figsize=(10, 6))
-        # plt.barh(range(len(sorted_importance_scores)), sorted_importance_scores[::-1], align='center')
-        # plt.yticks(range(len(sorted_importance_scores))[::-1], sorted_feature_names)
+        # Create a horizontal bar chart of feature importances
+        plt.figure(figsize=(10, 6))
+        plt.barh(range(len(sorted_importance_scores)), sorted_importance_scores[::-1], align='center')
+        plt.yticks(range(len(sorted_importance_scores))[::-1], sorted_feature_names)
 
-
-
-        # plt.title(f'Feature Importance Ranking for Environmental data model on {icd_code_title}')
-        # plt.ylabel('Features')
-        # plt.xlabel('Feature Importance Ranking')
-        # # plt.savefig(f'./Plots/{icd_code}/{icd_code}_feat_imp.png', bbox_inches='tight')
-        # #plt.show()
-        # # print(rmse_list)
+        plt.title(textwrap.fill(f'Feature Importance Ranking for Environmental data model on {icd_code_title}'))
+        plt.ylabel('Features')
+        plt.xlabel('Feature Importance Ranking')
+        plt.savefig(f'../Plots_{save_dir}/{icd_code}/{icd_code}_feat_imp.png', bbox_inches='tight')
+        #plt.show()
+        # print(rmse_list)
 
         # shap_plots(model, X_test)
         shap_plots(model, 
             X_test, 
             f'../Plots_{save_dir}/{icd_code}/{icd_code}_shap.png', 
-            title=f"SHAP Values for {icd_code_title}")
+            title=textwrap.fill(f"SHAP Values for {icd_code_title}"))
 
 
         plot_qq(full_pdf, f'../Plots_{save_dir}/{icd_code}/{icd_code}_qq.png')

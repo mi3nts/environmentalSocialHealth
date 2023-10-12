@@ -1,79 +1,79 @@
-var_name,units,long_name,standard_name
-longitude,degrees_east,longitude,
-latitude,degrees_north,latitude,
-time,,time,
-d2m,K,2 metre dewpoint temperature,
-t2m,K,2 metre temperature,
-bcaod550,~,Black Carbon Aerosol Optical Depth at 550nm,
-chnk,~,Charnock,
-duaod550,~,Dust Aerosol Optical Depth at 550nm,
-istl1,K,Ice temperature layer 1,
-lai_hv,m**2 m**-2,"Leaf area index, high vegetation",
-lai_lv,m**2 m**-2,"Leaf area index, low vegetation",
-msl,Pa,Mean sea level pressure,air_pressure_at_mean_sea_level
-omaod550,~,Organic Matter Aerosol Optical Depth at 550nm,
-pm10,kg m**-3,Particulate matter d <= 10 um,mass_concentration_of_pm10_ambient_aerosol_particles_in_air
-pm2p5,kg m**-3,Particulate matter d <= 2.5 um,mass_concentration_of_pm2p5_ambient_aerosol_particles_in_air
-siconc,(0 - 1),Sea ice area fraction,sea_ice_area_fraction
-ssaod550,~,Sea Salt Aerosol Optical Depth at 550nm,
-sst,K,Sea surface temperature,
-asn,(0 - 1),Snow albedo,
-rsn,kg m**-3,Snow density,
-sd,m of water equivalent,Snow depth,lwe_thickness_of_surface_snow_amount
-stl1,K,Soil temperature level 1,surface_temperature
-suaod550,~,Sulphate Aerosol Optical Depth at 550nm,
-sp,Pa,Surface pressure,surface_air_pressure
-tsn,K,Temperature of snow layer,temperature_in_surface_snow
-aod550,~,Total Aerosol Optical Depth at 550nm,
-tcco,kg m**-2,Total column Carbon monoxide,atmosphere_mass_content_of_carbon_monoxide
-tc_c2h6,kg m**-2,Total column  ethane,atmosphere_mass_content_of_ethane
-tchcho,kg m**-2,Total column Formaldehyde,atmosphere_mass_content_of_formaldehyde
-tc_oh,kg m**-2,Total column hydroxyl radical,atmosphere_mass_content_of_hydroxyl_radical
-tc_c5h8,kg m**-2,Total column  isoprene,atmosphere_mass_content_of_isoprene
-tc_ch4,kg m**-2,Total column methane,atmosphere_mass_content_of_methane
-tc_hno3,kg m**-2,Total column nitric acid,atmosphere_mass_content_of_nitric_acid
-tcno2,kg m**-2,Total column Nitrogen dioxide,atmosphere_mass_content_of_nitrogen_dioxide
-tc_no,kg m**-2,Total column nitrogen monoxide,atmosphere_mass_content_of_nitrogen_monoxide
-gtco3,kg m**-2,GEMS Total column ozone,atmosphere_mass_content_of_ozone
-tc_pan,kg m**-2,Total column  peroxyacetyl nitrate,atmosphere_mass_content_of_peroxyacetyl_nitrate
-tc_c3h8,kg m**-2,Total column propane,atmosphere_mass_content_of_propane
-tcso2,kg m**-2,Total column Sulphur dioxide,atmosphere_mass_content_of_sulfur_dioxide
-tcw,kg m**-2,Total column water,
-tcwv,kg m**-2,Total column vertically-integrated water vapour,lwe_thickness_of_atmosphere_mass_content_of_water_vapor
-aermssdus,kg m**-2,Vertically integrated mass of dust aerosol (0.03 - 0.55 um),
-aermssdum,kg m**-2,Vertically integrated mass of dust aerosol (0.55 - 9 um),
-aermssdul,kg m**-2,Vertically integrated mass of dust aerosol (9 - 20 um),
-aermssbchphil,kg m**-2,Vertically integrated mass of hydrophilic black carbon aerosol,
-aermssomhphil,kg m**-2,Vertically integrated mass of hydrophilic organic matter aerosol,
-aermssbchphob,kg m**-2,Vertically integrated mass of hydrophobic black carbon aerosol,
-aermssomhphob,kg m**-2,Vertically integrated mass of hydrophobic organic matter aerosol,
-aermsssss,kg m**-2,Vertically integrated mass of sea salt aerosol (0.03 - 0.5 um),
-aermssssm,kg m**-2,Vertically integrated mass of sea salt aerosol (0.5 - 5 um),
-aermssssl,kg m**-2,Vertically integrated mass of sea salt aerosol (5 - 20 um),
-aermsssu,kg m**-2,Vertically integrated mass of sulphate aerosol,
-aermssso2,kg m**-2,Vertically integrated mass of sulphur dioxide,
-co,kg kg**-1,Carbon monoxide mass mixing ratio,mass_fraction_of_carbon_monoxide_in_air
-aermr04,kg kg**-1,Dust Aerosol (0.03 - 0.55 um) Mixing Ratio,
-aermr05,kg kg**-1,Dust Aerosol (0.55 - 0.9 um) Mixing Ratio,
-aermr06,kg kg**-1,Dust Aerosol (0.9 - 20 um) Mixing Ratio,
-c2h6,kg kg**-1,Ethane,mass_fraction_of_ethane_in_air
-hcho,kg kg**-1,Formaldehyde,mass_fraction_of_formaldehyde_in_air
-aermr09,kg kg**-1,Hydrophilic Black Carbon Aerosol Mixing Ratio,
-aermr07,kg kg**-1,Hydrophilic Organic Matter Aerosol Mixing Ratio,
-aermr10,kg kg**-1,Hydrophobic Black Carbon Aerosol Mixing Ratio,
-aermr08,kg kg**-1,Hydrophobic Organic Matter Aerosol Mixing Ratio,
-oh,kg kg**-1,Hydroxyl radical,mass_fraction_of_hydroxyl_radical_in_air
-c5h8,kg kg**-1,Isoprene,mass_fraction_of_isoprene_in_air
-ch4_c,kg kg**-1,Methane (chemistry),mass_fraction_of_methane_in_air
-hno3,kg kg**-1,Nitric acid,mass_fraction_of_nitric_acid_in_air
-no2,kg kg**-1,Nitrogen dioxide mass mixing ratio,mass_fraction_of_nitrogen_dioxide_in_air
-no,kg kg**-1,Nitrogen monoxide mass mixing ratio,mass_fraction_of_nitrogen_monoxide_in_air
-go3,kg kg**-1,Ozone mass mixing ratio (full chemistry scheme),mass_fraction_of_ozone_in_air
-pan,kg kg**-1,Peroxyacetyl nitrate,mass_fraction_of_peroxyacetyl_nitrate_in_air
-c3h8,kg kg**-1,Propane,mass_fraction_of_propane_in_air
-aermr01,kg kg**-1,Sea Salt Aerosol (0.03 - 0.5 um) Mixing Ratio,
-aermr02,kg kg**-1,Sea Salt Aerosol (0.5 - 5 um) Mixing Ratio,
-aermr03,kg kg**-1,Sea Salt Aerosol (5 - 20 um) Mixing Ratio,
-aermr12,kg kg**-1,SO2 precursor mixing ratio,
-aermr11,kg kg**-1,Sulphate Aerosol Mixing Ratio,
-so2,kg kg**-1,Sulphur dioxide mass mixing ratio,mass_fraction_of_sulfur_dioxide_in_air
+var_name,units,long_name,short_name,standard_name
+longitude,degrees_east,longitude,,
+latitude,degrees_north,latitude,,
+time,,time,,
+d2m,K,2 metre dewpoint temperature,2m dew temp.,
+t2m,K,2 metre temperature,2m temp.,
+bcaod550,~,Black Carbon Aerosol Optical Depth at 550nm,BC AOD @ 550nm,
+chnk,~,Charnock,Charnock,
+duaod550,~,Dust Aerosol Optical Depth at 550nm,Dust AOD @ 550nm,
+istl1,K,Ice temperature layer 1,Ice temp. layer 1,
+lai_hv,m**2 m**-2,"Leaf area index, high vegetation","Leaf AI, high veg.",
+lai_lv,m**2 m**-2,"Leaf area index, low vegetation","Leaf AI, low veg.",
+msl,Pa,Mean sea level pressure,Mean sea level pressure,air_pressure_at_mean_sea_level
+omaod550,~,Organic Matter Aerosol Optical Depth at 550nm,Oragnic matter AOD @ 550nm,
+pm10,kg m**-3,Particulate matter d <= 10 um,PM_{10},mass_concentration_of_pm10_ambient_aerosol_particles_in_air
+pm2p5,kg m**-3,Particulate matter d <= 2.5 um,PM_{2.5},mass_concentration_of_pm2p5_ambient_aerosol_particles_in_air
+siconc,(0 - 1),Sea ice area fraction,Sea ice area fraction,sea_ice_area_fraction
+ssaod550,~,Sea Salt Aerosol Optical Depth at 550nm,Sea salt AOD @ 550nm,
+sst,K,Sea surface temperature,Sea surface temp.,
+asn,(0 - 1),Snow albedo,Snow albedo,
+rsn,kg m**-3,Snow density,Snow density,
+sd,m of water equivalent,Snow depth,Snow depth,lwe_thickness_of_surface_snow_amount
+stl1,K,Soil temperature level 1,Soil temp. level 1,surface_temperature
+suaod550,~,Sulphate Aerosol Optical Depth at 550nm,Sulphate AOD @ 550nm,
+sp,Pa,Surface pressure,Surface pressure,surface_air_pressure
+tsn,K,Temperature of snow layer,Temp. of snow layer,temperature_in_surface_snow
+aod550,~,Total Aerosol Optical Depth at 550nm,T AOD @ 550nm,
+tcco,kg m**-2,Total column Carbon monoxide,TC CO,atmosphere_mass_content_of_carbon_monoxide
+tc_c2h6,kg m**-2,Total column  ethane,TC C2H6,atmosphere_mass_content_of_ethane
+tchcho,kg m**-2,Total column Formaldehyde,TC CH2O,atmosphere_mass_content_of_formaldehyde
+tc_oh,kg m**-2,Total column hydroxyl radical,TC hydroxyl radical,atmosphere_mass_content_of_hydroxyl_radical
+tc_c5h8,kg m**-2,Total column  isoprene,TC isoprene,atmosphere_mass_content_of_isoprene
+tc_ch4,kg m**-2,Total column methane,TC CH4,atmosphere_mass_content_of_methane
+tc_hno3,kg m**-2,Total column nitric acid,TC HNO3,atmosphere_mass_content_of_nitric_acid
+tcno2,kg m**-2,Total column Nitrogen dioxide,TC NO2,atmosphere_mass_content_of_nitrogen_dioxide
+tc_no,kg m**-2,Total column nitrogen monoxide,TC NO,atmosphere_mass_content_of_nitrogen_monoxide
+gtco3,kg m**-2,GEMS Total column ozone,TC O3,atmosphere_mass_content_of_ozone
+tc_pan,kg m**-2,Total column  peroxyacetyl nitrate,TC PAN,atmosphere_mass_content_of_peroxyacetyl_nitrate
+tc_c3h8,kg m**-2,Total column propane,TC C3H8,atmosphere_mass_content_of_propane
+tcso2,kg m**-2,Total column Sulphur dioxide,TC SO2,atmosphere_mass_content_of_sulfur_dioxide
+tcw,kg m**-2,Total column water,TC H2O,
+tcwv,kg m**-2,Total column vertically-integrated water vapour,TC VI water vapour,lwe_thickness_of_atmosphere_mass_content_of_water_vapor
+aermssdus,kg m**-2,Vertically integrated mass of dust aerosol (0.03 - 0.55 um),VIM of DA (0.03 – 0.55 um),
+aermssdum,kg m**-2,Vertically integrated mass of dust aerosol (0.55 - 9 um),VIM of DA (0.55 – 9 um),
+aermssdul,kg m**-2,Vertically integrated mass of dust aerosol (9 - 20 um),VIM of DA (9 – 20 um),
+aermssbchphil,kg m**-2,Vertically integrated mass of hydrophilic black carbon aerosol,VIM of hydrophilic BC aerosol,
+aermssomhphil,kg m**-2,Vertically integrated mass of hydrophilic organic matter aerosol,VIM of hydrophilic organic matter aerosol,
+aermssbchphob,kg m**-2,Vertically integrated mass of hydrophobic black carbon aerosol,VIM of hydrophobic BC aerosol,
+aermssomhphob,kg m**-2,Vertically integrated mass of hydrophobic organic matter aerosol,VIM of hydrophobic organic matter aerosol,
+aermsssss,kg m**-2,Vertically integrated mass of sea salt aerosol (0.03 - 0.5 um),VIM of sea salt aerosol (0.03 – 0.55 um),
+aermssssm,kg m**-2,Vertically integrated mass of sea salt aerosol (0.5 - 5 um),VIM of sea salt aerosol (0.55 – 9 um),
+aermssssl,kg m**-2,Vertically integrated mass of sea salt aerosol (5 - 20 um),VIM of sea salt aerosol (9 – 20 um),
+aermsssu,kg m**-2,Vertically integrated mass of sulphate aerosol,VIC of sulphate aerosol,
+aermssso2,kg m**-2,Vertically integrated mass of sulphur dioxide,VIC of SO2,
+co,kg kg**-1,Carbon monoxide mass mixing ratio,CO MMR,mass_fraction_of_carbon_monoxide_in_air
+aermr04,kg kg**-1,Dust Aerosol (0.03 - 0.55 um) Mixing Ratio,DA (0.03 – 0.55 um) MR,
+aermr05,kg kg**-1,Dust Aerosol (0.55 - 0.9 um) Mixing Ratio,DA (0.55 – 0.9 um) MR,
+aermr06,kg kg**-1,Dust Aerosol (0.9 - 20 um) Mixing Ratio,DA (9 – 20 um) MR,
+c2h6,kg kg**-1,Ethane,C2H6,mass_fraction_of_ethane_in_air
+hcho,kg kg**-1,Formaldehyde,CH20,mass_fraction_of_formaldehyde_in_air
+aermr09,kg kg**-1,Hydrophilic Black Carbon Aerosol Mixing Ratio,Hydrophilic BC aerosol MR,
+aermr07,kg kg**-1,Hydrophilic Organic Matter Aerosol Mixing Ratio,Hydrophilic organic matter aerosol MR,
+aermr10,kg kg**-1,Hydrophobic Black Carbon Aerosol Mixing Ratio,Hydrophobic BC aerosol MR,
+aermr08,kg kg**-1,Hydrophobic Organic Matter Aerosol Mixing Ratio,Hydrophobic organic matter aerosol ML,
+oh,kg kg**-1,Hydroxyl radical,Hydroxyl radical,mass_fraction_of_hydroxyl_radical_in_air
+c5h8,kg kg**-1,Isoprene,isoprene,mass_fraction_of_isoprene_in_air
+ch4_c,kg kg**-1,Methane (chemistry),CH4,mass_fraction_of_methane_in_air
+hno3,kg kg**-1,Nitric acid,HNO3,mass_fraction_of_nitric_acid_in_air
+no2,kg kg**-1,Nitrogen dioxide mass mixing ratio,NO2 MMR,mass_fraction_of_nitrogen_dioxide_in_air
+no,kg kg**-1,Nitrogen monoxide mass mixing ratio,NO MMR,mass_fraction_of_nitrogen_monoxide_in_air
+go3,kg kg**-1,Ozone mass mixing ratio (full chemistry scheme),O3 MMR,mass_fraction_of_ozone_in_air
+pan,kg kg**-1,Peroxyacetyl nitrate,PAN,mass_fraction_of_peroxyacetyl_nitrate_in_air
+c3h8,kg kg**-1,Propane,C3H8,mass_fraction_of_propane_in_air
+aermr01,kg kg**-1,Sea Salt Aerosol (0.03 - 0.5 um) Mixing Ratio,Sea salt aerosol (0.03 – 0.5 um) MR,
+aermr02,kg kg**-1,Sea Salt Aerosol (0.5 - 5 um) Mixing Ratio,Sea salt aerosol (0.5 – 5 um) MR,
+aermr03,kg kg**-1,Sea Salt Aerosol (5 - 20 um) Mixing Ratio,Sea salt aerosol (5 – 20 um) MR,
+aermr12,kg kg**-1,SO2 precursor mixing ratio,SO2 precursor MR,
+aermr11,kg kg**-1,Sulphate Aerosol Mixing Ratio,Sulphate aerosol MR,
+so2,kg kg**-1,Sulphur dioxide mass mixing ratio,SO2 MMR,mass_fraction_of_sulfur_dioxide_in_air
