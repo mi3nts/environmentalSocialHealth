@@ -44,6 +44,8 @@ for file in all_census_files:
     temp_df['census_var'] = file.split('/')[-1].replace('.csv','')
     census_data = pd.concat([census_data, temp_df])
 census_data = census_data.reset_index(drop=True)
+census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] = census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]].mask(census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] < 0, np.nan)
+
 
 pandas_or_polars = False
 
@@ -280,13 +282,15 @@ def getDF(icd_codes): # this is the parallel function
             env_df = env_data[env_data['quarter'] == quarter]
 
             census_year = census_data.loc[:,['PAT_ZIP',quarter[:4],'census_var']]
-            year_pivot = census_year.pivot(index='PAT_ZIP', columns='census_var', values='2005').reset_index()
-            
+            year_pivot = census_year.pivot(index='PAT_ZIP', columns='census_var', values=quarter[:4]).reset_index()
+
             # census_df = census_data[census_data['year'] == quarter[:4]]
             # env_icd = env_df.merge(icd_df, on='PAT_ZIP')
 
             # full_df = census_df.merge(env_icd, on='PAT_ZIP')
             full_df = env_df.merge(icd_df, on='PAT_ZIP')
+            full_df = full_df.merge(year_pivot, on='PAT_ZIP')
+
             full_df['pop_density'] = full_df['population']/(full_df['LandArea_sqm']/1_000_000)
 
             df = pd.concat([df, full_df])
@@ -316,7 +320,9 @@ def getDF(icd_codes): # this is the parallel function
         # X = data_quality.drop(['LandArea_sqm'], axis=1) # dropping land area in sqm
         # print(len(X))
         #data_list.append(data_quality)
-        data_quality.to_csv(f'{icd_code}.csv')
+
+
+        # data_quality.to_csv(f'{icd_code}.csv')
 
         # "chnk", \
         X = data_quality.loc[:,["d2m","t2m", "lai_hv","lai_lv", 
@@ -337,6 +343,9 @@ def getDF(icd_codes): # this is the parallel function
         # "males college > 1yr, no degree","males associate degree", "SNAP eligibility",]]
         # X = X.dropna()
         # print(X.shape)
+        X = data_quality.drop('normalized',axis=1)
+
+
 
         # data_quality['normalized'].plot()
 
@@ -452,7 +461,7 @@ def getDF(icd_codes): # this is the parallel function
 
 num_workers = multiprocessing.cpu_count()
 icd_codes = [i for i in os.listdir(icd_data)]
-icd_codes = ['A419','I2510','E860','J189']
+# icd_codes = ['A419','I2510','E860','J189']
 # icd_codes = icd_codes[:54]
 os.makedirs(f'../Results_nthresh_{nthresh}_{save_dir}', exist_ok=True)
     
