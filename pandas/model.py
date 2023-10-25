@@ -16,6 +16,8 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import shap
 import re
+import simple_icd_10_cm as cm
+import textwrap
 
 root = "../CAMS/"
 units = "../assets/CAMS_units.csv"
@@ -23,6 +25,15 @@ zip_2010 = "../assets/tx_texas_zip_codes_geo.min.json"
 hospital_data = "/media/teamlary/ssd/Discharge Data/Inpatient/Data/"
 census_dir = "../Census/"
 icd_data = "../icd10/"
+
+pandas_or_polars = False
+
+if pandas_or_polars:
+    icd_data = "../icd10_pandas/"
+    save_dir = 'pandas'
+else:
+    icd_data = '../icd10_polars/'
+    save_dir = 'polars'
 
 tx_zip = gpd.read_file(zip_2010)
 
@@ -344,47 +355,50 @@ def getDF(icd_codes):
 
         mse, train_r2, test_r2, train_acc, test_acc, full_pdf = eval_results(y_test, y_pred, y_train, train_preds)
         # print('full pdf', len(full_pdf))
-        print('sus error start')
+        # print('sus error start')
     
         test_train_plot(full_pdf, y_test, train_r2, y_train, X_train_scaled, test_r2, X_test_scaled,
-                        title=f"ICD-10 Codes for {icd_code_labels[icd_code_title]} \n # threshold = {nthresh}, Environmental data \n from {start_year} to {end_year-1}",
-                        save_path=f'./Plots/{icd_code}/{icd_code}_r2.png'
+                        title=textwrap.fill(f"ICD-10 Codes for {icd_code_title} \n # threshold = {nthresh}, \
+                        Environmental data \n from {start_year} to {end_year-1}"),
+                        save_path=f'../Plots_{save_dir}/{icd_code}/{icd_code}_r2.png'
                         )
-        print('sus error end')
+        # print('sus error end')
+
+        if cm.is_valid_item(icd_code):
+            icd_code_title = cm.get_description(icd_code)
+        else: 
+            icd_code_title = icd_code
         
+        model_rf = RandomForestRegressor()
+        model_rf.fit(X_train_scaled, y_train)
+
+        importance_scores = model_rf.feature_importances_
+        feature_names = [nice_names[i] for i in X.columns]
+        # feature_names = X.columns
+
+        # Sort feature importances in descending order
+        indices = importance_scores.argsort()[::-1][:20]
+        sorted_feature_names = ([feature_names[i] for i in indices])
+        sorted_importance_scores = (importance_scores[indices])
+
+        # Create a horizontal bar chart of feature importances
+        plt.figure(figsize=(10, 6))
+        plt.barh(range(len(sorted_importance_scores)), sorted_importance_scores[::-1], align='center')
+        plt.yticks(range(len(sorted_importance_scores))[::-1], sorted_feature_names)
+
+        plt.title(textwrap.fill(f'Feature Importance Ranking for Environmental data model on {icd_code_title}'))
+        plt.ylabel('Features')
+        plt.xlabel('Feature Importance Ranking')
+        plt.savefig(f'../Plots_{save_dir}/{icd_code}/{icd_code}_feat_imp.png', bbox_inches='tight')
+        plt.clf()
         
-        # don't use with XGBoost
-
-        # importance_scores = model.feature_importances_
-        # feature_names = [nice_names[i] for i in X.columns]
-        # # feature_names = X.columns
-        # # feature_names = [(i, nice_names[i]) for i in X.columns]
-
-        # # Sort feature importances in descending order
-        # indices = importance_scores.argsort()[::-1][:20]
-        # sorted_feature_names = ([feature_names[i] for i in indices])
-        # sorted_importance_scores = (importance_scores[indices])
-
-        # # Create a horizontal bar chart of feature importances
-        # plt.figure(figsize=(10, 6))
-        # plt.barh(range(len(sorted_importance_scores)), sorted_importance_scores[::-1], align='center')
-        # plt.yticks(range(len(sorted_importance_scores))[::-1], sorted_feature_names)
-
-
-
-        # plt.title(f'Feature Importance Ranking for Environmental data model on {icd_code_labels[icd_code_title]}')
-        # plt.ylabel('Features')
-        # plt.xlabel('Feature Importance Ranking')
-        # # plt.savefig(f'./Plots/{icd_code}/{icd_code}_feat_imp.png')
-        # plt.show()
-        # print(rmse_list)
-
         shap_plots(model, 
             X_test, 
-            f'./Plots/{icd_code}/{icd_code}_shap.png', 
-            title=f"SHAP Values for {icd_code_labels[icd_code_title]}")
+            f'../Plots_{save_dir}/{icd_code}/{icd_code}_shap.png', 
+            title=textwrap.fill(f"SHAP Values for {icd_code_title}"))
 
-        plot_qq(full_pdf, f'./Plots/{icd_code}/{icd_code}_qq.png')
+
+        plot_qq(full_pdf, f'../Plots_{save_dir}/{icd_code}/{icd_code}_qq.png')
 
         del full_pdf, df
 
@@ -414,8 +428,11 @@ icd_code_labels = {
     'F209' : 'Schizophrenia, unspecified'
 }
 
-icd_codes = ['A4189', 'I5042','I509', 'I2510','F209','G309', 'J4521']
-icd_codes_subset = list(icd_code_labels.keys())[:1]
+#icd_codes = ['A4189', 'I5042','I509', 'I2510','F209','G309', 'J4521']
+#icd_codes_subset = list(icd_code_labels.keys())[:1]
+icd_codes_subset = ['A419','I2510','E860','J189'][:1]
 
 print("Creating Models... \n\n")
 data_for_icd = getDF(icd_codes_subset)
+data_for_icd[0].to_csv(f'{icd_codes_subset[:1]}.csv',index=False)
+

@@ -213,13 +213,12 @@ def shap_plots(model, X_test, save_path, title):
     plt.savefig(save_path, bbox_inches='tight')
     # plt.show()
     
-def plot_qq(full_pdf, save_path):
-    # print('inside qq plot')
+def plot_qq(full_pdf, save_path, title):
+    print('inside qq plot')
     fig = qqplot_2samples(full_pdf['Predicted'],full_pdf['Actual'],line='45', 
                     xlabel='Predicted ($\log_{10}$(# ICD Codes/Zip Code Population))',  
                     ylabel='Actual ($\log_{10}$(# ICD Codes/Zip Code Population))')
-    plt.title(f'Quantile-Quantile plot')
-
+    plt.title(f'{title}') 
     # plt.show()
     plt.savefig(save_path, bbox_inches='tight')
     # plt.show()
@@ -250,6 +249,7 @@ os.makedirs(f"../Results_nthresh_{nthresh}_{save_dir}", exist_ok=True)
 
 def getDF(icd_codes): # this is the parallel function
     fits_data = []
+    data_list = []
 
     for icd_code in icd_codes:
         #print(icd_code)
@@ -298,14 +298,17 @@ def getDF(icd_codes): # this is the parallel function
         # X = data_quality.drop(['PAT_ZIP','ICD','normalized', 'population', 'quarter'], axis=1)
         # X = data_quality.drop(['LandArea_sqm'], axis=1) # dropping land area in sqm
         # print(len(X))
+        #data_list.append(data_quality)
+        data_quality.to_csv(f'{icd_code}.csv')
 
         # "chnk", \
         X = data_quality.loc[:,["d2m","t2m", "lai_hv","lai_lv", 
             "pm10","pm2p5","stl1",
-            "sp",
+            #"sp",
             "co", "aermr04","aermr05","aermr06", 
             "c2h6","hcho","aermr09","aermr07","aermr10",
-            "aermr08","oh", "c5h8", "ch4_c",
+            "aermr08","oh", "c5h8", 
+            #"ch4_c",
             "hno3","no2","no","go3","pan",
             "c3h8", "aermr01","aermr02","aermr03",
             "aermr12",
@@ -377,8 +380,8 @@ def getDF(icd_codes): # this is the parallel function
         # print('full pdf', len(full_pdf))
         # print('full pdf', len(full_pdf))
         test_train_plot(full_pdf, y_test, train_r2, y_train, X_train_scaled, test_r2, X_test_scaled,
-                        title=textwrap.fill(f"ICD-10 Codes for {icd_code_title} \n # threshold = {nthresh}, \
-                        Environmental data \n from {start_year} to {end_year-1}"),
+                        title=textwrap.fill(f"ICD-10 Codes for {icd_code_title}, \n # threshold = {nthresh}, \
+                        Environmental data, \n from {start_year} to {end_year-1}"),
                         save_path=f'../Plots_{save_dir}/{icd_code}/{icd_code}_r2.png'
                         )
 
@@ -402,6 +405,7 @@ def getDF(icd_codes): # this is the parallel function
         plt.ylabel('Features')
         plt.xlabel('Feature Importance Ranking')
         plt.savefig(f'../Plots_{save_dir}/{icd_code}/{icd_code}_feat_imp.png', bbox_inches='tight')
+        plt.clf()
         #plt.show()
         # print(rmse_list)
 
@@ -412,13 +416,16 @@ def getDF(icd_codes): # this is the parallel function
             title=textwrap.fill(f"SHAP Values for {icd_code_title}"))
 
 
-        plot_qq(full_pdf, f'../Plots_{save_dir}/{icd_code}/{icd_code}_qq.png')
+        plot_qq(full_pdf, 
+        f'../Plots_{save_dir}/{icd_code}/{icd_code}_qq.png',
+        title=textwrap.fill(f"Quartile-quartile plot for {icd_code_title}"))
 
         del full_pdf, df
 
         fits_data.append([icd_code, train_r2, test_r2, np.sqrt(mse), len(X)])
 
     return fits_data
+
 
     # fits_df = pd.DataFrame(fits_data)
     # fits_df.columns = ['ICD', 'train_r2', 'test_r2', 'rmse', 'numDataPoints']
@@ -428,6 +435,7 @@ def getDF(icd_codes): # this is the parallel function
 
 num_workers = multiprocessing.cpu_count()
 icd_codes = [i for i in os.listdir(icd_data)]
+icd_codes = ['A419','I2510','E860','J189']
 # icd_codes = icd_codes[:54]
 os.makedirs(f'../Results_nthresh_{nthresh}_{save_dir}', exist_ok=True)
     
