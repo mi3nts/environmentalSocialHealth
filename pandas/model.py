@@ -182,13 +182,12 @@ def test_train_plot(full_pdf, y_test, train_r2, y_train, X_train, test_r2, X_tes
     # plt.show()
 
     
-def plot_qq(full_pdf, save_path):
+def plot_qq(full_pdf, save_path, title):
     print('inside qq plot')
     fig = qqplot_2samples(full_pdf['Predicted'],full_pdf['Actual'],line='45', 
                     xlabel='Predicted ($\log_{10}$(# ICD Codes/Zip Code Population))',  
                     ylabel='Actual ($\log_{10}$(# ICD Codes/Zip Code Population))')
-    plt.title(f'Quantile-Quantile plot')
-
+    plt.title(f'{title}') 
     # plt.show()
     plt.savefig(save_path, bbox_inches='tight')
     # plt.show()
@@ -391,7 +390,7 @@ def getDF(icd_codes):
         plt.xlabel('Feature Importance Ranking')
         plt.savefig(f'../Plots_{save_dir}/{icd_code}/{icd_code}_feat_imp.png', bbox_inches='tight')
         plt.clf()
-        
+
         shap_plots(model, 
             X_test, 
             f'../Plots_{save_dir}/{icd_code}/{icd_code}_shap.png', 

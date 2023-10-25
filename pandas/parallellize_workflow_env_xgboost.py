@@ -45,7 +45,9 @@ for file in all_census_files:
     census_data = pd.concat([census_data, temp_df])
 census_data = census_data.reset_index(drop=True)
 census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] = census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]].mask(census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] < 0, np.nan)
-
+census_data = census_data.fillna(0)
+# print(census_data.shape)
+# print(census_data.isna().sum())
 
 pandas_or_polars = False
 
@@ -204,7 +206,7 @@ def shap_plots(model, X_test, save_path, title):
     # feature_names = [nice_names[i] for i in X_test.columns]
     # print(feature_names)
     # feature_names = X_test.columns
-    feature_names = {i: nice_names[i] for i in X_test.columns}
+    feature_names = {i: nice_names[i] if i in nice_names.keys() else i for i in X_test.columns}
     # print([(i,j,nice_names[j]) for i,j in  enumerate(feature_names)])
     # print(feature_names)
     # X_test = pd.DataFrame(X_test)
@@ -268,7 +270,7 @@ def getDF(icd_codes): # this is the parallel function
     data_list = []
 
     for icd_code in icd_codes:
-        #print(icd_code)
+        print(icd_code)
         df = pd.DataFrame()
         for quarter in hospital_quarters[:-1]: # [:-1] to avoid 2022q1 
 
@@ -294,6 +296,9 @@ def getDF(icd_codes): # this is the parallel function
             full_df['pop_density'] = full_df['population']/(full_df['LandArea_sqm']/1_000_000)
 
             df = pd.concat([df, full_df])
+            
+        # print(df.isna().sum())
+        # print(df)
 
 
         data = df.copy()
@@ -343,7 +348,8 @@ def getDF(icd_codes): # this is the parallel function
         # "males college > 1yr, no degree","males associate degree", "SNAP eligibility",]]
         # X = X.dropna()
         # print(X.shape)
-        X = data_quality.drop('normalized',axis=1)
+        X = data_quality.drop(['quarter','PAT_ZIP','normalized','LandArea_sqm','ICD','population','pop_density'],axis=1)
+        # print(X)
 
 
 
@@ -353,12 +359,15 @@ def getDF(icd_codes): # this is the parallel function
         sns.set_style('ticks')
         # rmse_list = []
         # for i in range(500):
+        # print('before log10 normalized')
         y = np.log10(data_quality['normalized'])
+        print('after log10 normalized')
         # y = data_quality['normalized']
         # y = data_quality['ICD']
         # seed = 140
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) #, random_state=seed)
+        print('after train test split')
 
         feature_scaler = MinMaxScaler()
         X_train_scaled = feature_scaler.fit_transform(X_train)
@@ -368,16 +377,42 @@ def getDF(icd_codes): # this is the parallel function
         y_train_scaled = target_scaler.fit_transform(y_train.to_numpy().reshape(-1,1))
         y_test_scaled = target_scaler.transform(y_test.to_numpy().reshape(-1,1))
 
-        model_rf = RandomForestRegressor()
-        # model = GradientBoostingRegressor()
+        if cm.is_valid_item(icd_code):
+            icd_code_title = cm.get_description(icd_code)
+        else: 
+            icd_code_title = icd_code
+        
+        # print('Before creating models')
+        # model_rf = RandomForestRegressor()
+        # # model = GradientBoostingRegressor()
 
-        # model = ExtraTreesRegressor()
+        # # model = ExtraTreesRegressor()
 
-        # Train and predict using each model
-        # predictions = {}
-        # for model_name, model in models.items():
-        # print('X_train', len(X_train_scaled), ' y_test', len(y_test))
-        model_rf.fit(X_train_scaled, y_train)
+        # # Train and predict using each model
+        # # predictions = {}
+        # # for model_name, model in models.items():
+        # # print('X_train', len(X_train_scaled), ' y_test', len(y_test))
+        # model_rf.fit(X_train_scaled, y_train)
+
+        # importance_scores = model_rf.feature_importances_
+        # feature_names = [nice_names[i] if i in nice_names.keys() else i for i in X.columns]
+        # # feature_names = X.columns
+
+        # # Sort feature importances in descending order
+        # indices = importance_scores.argsort()[::-1][:20]
+        # sorted_feature_names = ([feature_names[i] for i in indices])
+        # sorted_importance_scores = (importance_scores[indices])
+
+        # # Create a horizontal bar chart of feature importances
+        # plt.figure(figsize=(10, 6))
+        # plt.barh(range(len(sorted_importance_scores)), sorted_importance_scores[::-1], align='center')
+        # plt.yticks(range(len(sorted_importance_scores))[::-1], sorted_feature_names)
+
+        # plt.title(textwrap.fill(f'Feature Importance Ranking for Environmental data model on {icd_code_title}'))
+        # plt.ylabel('Features')
+        # plt.xlabel('Feature Importance Ranking')
+        # plt.savefig(f'../Plots_{save_dir}/{icd_code}/{icd_code}_feat_imp.png', bbox_inches='tight')
+        # plt.clf()
         # y_pred = model_rf.predict(X_test_scaled)
 
         # r2_scores = r2_score(y_test, y_pred)
@@ -387,10 +422,7 @@ def getDF(icd_codes): # this is the parallel function
         # -----------
 
         # Get feature importances
-        if cm.is_valid_item(icd_code):
-            icd_code_title = cm.get_description(icd_code)
-        else: 
-            icd_code_title = icd_code
+
 # [cm.get_description(i) if cm.is_valid_item(i) else "Unknown Code" for i in list(results_df.ICD)]
 #         icd_code_title = [cm.get_description]
         # y_pred = model.predict(X_test_scaled)
@@ -413,25 +445,6 @@ def getDF(icd_codes): # this is the parallel function
 
         
         
-        importance_scores = model_rf.feature_importances_
-        feature_names = [nice_names[i] for i in X.columns]
-        # feature_names = X.columns
-
-        # Sort feature importances in descending order
-        indices = importance_scores.argsort()[::-1][:20]
-        sorted_feature_names = ([feature_names[i] for i in indices])
-        sorted_importance_scores = (importance_scores[indices])
-
-        # Create a horizontal bar chart of feature importances
-        plt.figure(figsize=(10, 6))
-        plt.barh(range(len(sorted_importance_scores)), sorted_importance_scores[::-1], align='center')
-        plt.yticks(range(len(sorted_importance_scores))[::-1], sorted_feature_names)
-
-        plt.title(textwrap.fill(f'Feature Importance Ranking for Environmental data model on {icd_code_title}'))
-        plt.ylabel('Features')
-        plt.xlabel('Feature Importance Ranking')
-        plt.savefig(f'../Plots_{save_dir}/{icd_code}/{icd_code}_feat_imp.png', bbox_inches='tight')
-        plt.clf()
         #plt.show()
         # print(rmse_list)
 
@@ -462,10 +475,12 @@ def getDF(icd_codes): # this is the parallel function
 num_workers = multiprocessing.cpu_count()
 icd_codes = [i for i in os.listdir(icd_data)]
 # icd_codes = ['A419','I2510','E860','J189']
+# icd_codes = ['A419']
 # icd_codes = icd_codes[:54]
-os.makedirs(f'../Results_nthresh_{nthresh}_{save_dir}', exist_ok=True)
+# os.makedirs(f'../Results_nthresh_{nthresh}_{save_dir}', exist_ok=True)
     
-for i in range(42): # change these hard coded numbers 
+# for i in range(4): # change these hard coded numbers 
+for i in range(42):
 
         pool = multiprocessing.Pool(processes=num_workers)
         
@@ -480,7 +495,7 @@ for i in range(42): # change these hard coded numbers
              
         # print(zip_olist)
         result = pd.DataFrame([i[0] for i in zip_olist if len(i) > 0])
-        # print(result)
+        print(result)
         if len(result) > 0:
             result.columns = ['ICD', 'train_r2', 'test_r2', 'rmse', 'numDataPoints']
             result.to_csv(f"../Results_nthresh_{nthresh}_{save_dir}/multiprocess_df_{i}.csv")
