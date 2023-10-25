@@ -23,6 +23,7 @@ import re
 from statsmodels.graphics.gofplots import qqplot_2samples
 import simple_icd_10_cm as cm
 import textwrap
+import glob
 
 
 root = "../CAMS/"
@@ -30,6 +31,19 @@ units = "../assets/CAMS_units.csv"
 zip_2010 = "../assets/tx_texas_zip_codes_geo.min.json"
 hospital_data = "/media/teamlary/ssd/Discharge Data/Inpatient/Data/"
 census_dir = "../Census/"
+
+# reading in census data
+
+interp_files = "../assets/census/derivedVariables/interpolatedDataByYear/"
+file_pattern = interp_files + '/**/*'
+all_census_files = [file.replace('\\','/') for file in glob.glob(file_pattern, recursive=True) if file.endswith('.csv')]
+
+census_data = pd.DataFrame()
+for file in all_census_files:
+    temp_df = pd.read_csv(file)
+    temp_df['census_var'] = file.split('/')[-1].replace('.csv','')
+    census_data = pd.concat([census_data, temp_df])
+census_data = census_data.reset_index(drop=True)
 
 pandas_or_polars = False
 
@@ -264,6 +278,9 @@ def getDF(icd_codes): # this is the parallel function
             # merge with zip codes that are in icd_df
             # this merged df needs to be concat into df for every quarter
             env_df = env_data[env_data['quarter'] == quarter]
+
+            census_year = census_data.loc[:,['PAT_ZIP',quarter[:4],'census_var']]
+            year_pivot = census_year.pivot(index='PAT_ZIP', columns='census_var', values='2005').reset_index()
             
             # census_df = census_data[census_data['year'] == quarter[:4]]
             # env_icd = env_df.merge(icd_df, on='PAT_ZIP')
