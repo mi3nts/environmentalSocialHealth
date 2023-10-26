@@ -46,6 +46,7 @@ for file in all_census_files:
 census_data = census_data.reset_index(drop=True)
 census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] = census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]].mask(census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] < 0, np.nan)
 census_data = census_data.fillna(0)
+census_labels = census_data['census_var'].unique()
 # print(census_data.shape)
 # print(census_data.isna().sum())
 
@@ -59,6 +60,10 @@ else:
     save_dir = 'polars'
 
 tx_zip = gpd.read_file(zip_2010)
+tx_zip = tx_zip.rename(columns={
+    'ZCTA5CE10': 'PAT_ZIP'
+})
+tx_zip['PAT_ZIP'] = tx_zip['PAT_ZIP'].astype(str)
 
 start_year = 2005
 end_year = 2022
@@ -94,7 +99,7 @@ def grabWeatherData(time_period):
 
         # means.insert(0, 'PAT_ZIP', tx_zip['ZCTA5CE10'].values)
     # means.columns = units_df['var_name'].values
-    means.insert(0, 'PAT_ZIP', tx_zip['ZCTA5CE10'].to_list()*len(time_period))
+    means.insert(0, 'PAT_ZIP', tx_zip['PAT_ZIP'].to_list()*len(time_period))
     means.insert(1, 'LandArea_sqm', tx_zip['ALAND10'].to_list()*len(time_period))
     means['PAT_ZIP'] = means['PAT_ZIP'].astype('int')
 
@@ -113,6 +118,20 @@ units_df = pd.read_csv(units)
 unit_names = ['quarter', 'PAT_ZIP','LandArea_sqm'] + list(units_df['var_name'].values[3:])
 env_data.columns = unit_names
 env_data = env_data.reset_index(drop=True)
+# print(env_data.columns)
+env_labels = ['d2m', 't2m', 'bcaod550', 'chnk',
+       'duaod550', 'istl1', 'lai_hv', 'lai_lv', 'msl', 'omaod550', 'pm10',
+       'pm2p5', 'ssaod550', 'asn', 'rsn', 'sd', 'stl1',
+       'suaod550', 'sp', 'tsn', 'aod550', 'tcco', 'tc_c2h6', 'tchcho', 'tc_oh',
+       'tc_c5h8', 'tc_ch4', 'tc_hno3', 'tcno2', 'tc_no', 'gtco3', 'tc_pan',
+       'tc_c3h8', 'tcso2', 'tcw', 'tcwv', 'aermssdus', 'aermssdum',
+       'aermssdul', 'aermssbchphil', 'aermssomhphil', 'aermssbchphob',
+       'aermssomhphob', 'aermsssss', 'aermssssm', 'aermssssl', 'aermsssu',
+       'aermssso2', 'co', 'aermr04', 'aermr05', 'aermr06', 'c2h6', 'hcho',
+       'aermr09', 'aermr07', 'aermr10', 'aermr08', 'oh', 'c5h8', 'ch4_c',
+       'hno3', 'no2', 'no', 'go3', 'pan', 'c3h8', 'aermr01', 'aermr02',
+       'aermr03', 'aermr12', 'aermr11', 'so2']
+
 
 nice_names = dict(zip(env_data.columns[3:], units_df['long_name'][3:].values))
 nice_names['go3'] = 'Ozone mass mixing ratio'
@@ -281,19 +300,28 @@ def getDF(icd_codes): # this is the parallel function
             # for each quarter, .loc env_data that is on that quarter, then 
             # merge with zip codes that are in icd_df
             # this merged df needs to be concat into df for every quarter
+
+            # uncomment to include environmental variables
             env_df = env_data[env_data['quarter'] == quarter]
 
             census_year = census_data.loc[:,['PAT_ZIP',quarter[:4],'census_var']]
             year_pivot = census_year.pivot(index='PAT_ZIP', columns='census_var', values=quarter[:4]).reset_index()
+            # year_pivot['PAT_ZIP'] = year_pivot['PAT_ZIP'].astype(str)
+
+            # full_df = year_pivot.merge(icd_df, on='PAT_ZIP')
+            #print(type(year_pivot['PAT_ZIP'][0]), type(tx_zip['PAT_ZIP'][0]))
 
             # census_df = census_data[census_data['year'] == quarter[:4]]
             # env_icd = env_df.merge(icd_df, on='PAT_ZIP')
 
             # full_df = census_df.merge(env_icd, on='PAT_ZIP')
+
+            # uncomment when including environmental variables
             full_df = env_df.merge(icd_df, on='PAT_ZIP')
             full_df = full_df.merge(year_pivot, on='PAT_ZIP')
-
             full_df['pop_density'] = full_df['population']/(full_df['LandArea_sqm']/1_000_000)
+
+            # full_df = year_pivot.merge(tx_zip['PAT_ZIP'], on='PAT_ZIP')
 
             df = pd.concat([df, full_df])
             
@@ -330,7 +358,7 @@ def getDF(icd_codes): # this is the parallel function
         # data_quality.to_csv(f'{icd_code}.csv')
 
         # "chnk", \
-        X = data_quality.loc[:,["d2m","t2m", "lai_hv","lai_lv", 
+        '''X = data_quality.loc[:,["d2m","t2m", "lai_hv","lai_lv", 
             "pm10","pm2p5","stl1",
             #"sp",
             "co", "aermr04","aermr05","aermr06", 
@@ -341,14 +369,14 @@ def getDF(icd_codes): # this is the parallel function
             "c3h8", "aermr01","aermr02","aermr03",
             "aermr12",
             "aermr11",
-            "so2"]]# "median household income", \
+            "so2"]]'''# "median household income", \
         # "hispanic",
         # # "aggregate income",\
         # "males college < 1yr", \
         # "males college > 1yr, no degree","males associate degree", "SNAP eligibility",]]
         # X = X.dropna()
         # print(X.shape)
-        X = data_quality.drop(['quarter','PAT_ZIP','normalized','LandArea_sqm','ICD','population','pop_density'],axis=1)
+        X = data_quality.drop(['quarter','PAT_ZIP','normalized','LandArea_sqm','ICD','population','pop_density']+env_labels,axis=1)
         # print(X)
 
 
