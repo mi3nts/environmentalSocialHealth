@@ -24,6 +24,7 @@ from statsmodels.graphics.gofplots import qqplot_2samples
 import simple_icd_10_cm as cm
 import textwrap
 import glob
+import cenpy
 
 
 root = "../CAMS/"
@@ -31,6 +32,12 @@ units = "../assets/CAMS_units.csv"
 zip_2010 = "../assets/tx_texas_zip_codes_geo.min.json"
 hospital_data = "/media/teamlary/ssd/Discharge Data/Inpatient/Data/"
 census_dir = "../Census/"
+
+def modify_val(row):
+    if row['census_var'].startswith('B17020'):
+        return row['census_var'] + '_002E'
+    else:
+        return row['census_var']
 
 # reading in census data
 
@@ -44,11 +51,24 @@ for file in all_census_files:
     temp_df['census_var'] = file.split('/')[-1].replace('.csv','')
     census_data = pd.concat([census_data, temp_df])
 census_data = census_data.reset_index(drop=True)
+census_data['census_var'] = census_data.apply(modify_val, axis=1)
 census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] = census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]].mask(census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] < 0, np.nan)
 census_data = census_data.fillna(0)
-census_labels = census_data['census_var'].unique()
+# census_labels = census_data['census_var'].unique()
+census_variables = list(census_data['census_var'].unique())
+#census_variables = [f'{i}_002E' if i.startswith('B17020') else i for i in census_variables]
 # print(census_data.shape)
 # print(census_data.isna().sum())
+
+survey = 'ACSDT5Y2011'
+acs_conn = cenpy.remote.APIConnection(survey)
+acs_variables_df = acs_conn.variables
+var_names = [f'{acs_variables_df.loc[i]["label"]}, {acs_variables_df.loc[i]["concept"]}' for i in census_variables]
+var_names = [i.lower().replace('estimate!!total!!','').replace('!!',' - ') for i in var_names]
+var_names = [i.replace('sex by educational attainment for the population 25 years and over','') for i in var_names]
+var_names = [i.replace('income in the past 12 months below','') for i in var_names]
+var_names = [i.replace('estimate - median household income in the past 12 months (in 2011 inflation-adjusted dollars)','') for i in var_names]
+census_var_dict = dict(zip([i for i in sorted(census_variables)], var_names))
 
 pandas_or_polars = False
 
@@ -131,6 +151,18 @@ env_labels = ['d2m', 't2m', 'bcaod550', 'chnk',
        'aermr09', 'aermr07', 'aermr10', 'aermr08', 'oh', 'c5h8', 'ch4_c',
        'hno3', 'no2', 'no', 'go3', 'pan', 'c3h8', 'aermr01', 'aermr02',
        'aermr03', 'aermr12', 'aermr11', 'so2']
+suitable_env_vars = ["d2m","t2m", "lai_hv","lai_lv", 
+            "pm10","pm2p5","stl1",
+            #"sp",
+            "co", "aermr04","aermr05","aermr06", 
+            "c2h6","hcho","aermr09","aermr07","aermr10",
+            "aermr08","oh", "c5h8", 
+            #"ch4_c",
+            "hno3","no2","no","go3","pan",
+            "c3h8", "aermr01","aermr02","aermr03",
+            "aermr12",
+            "aermr11",
+            "so2"]
 
 
 nice_names = dict(zip(env_data.columns[3:], units_df['long_name'][3:].values))
@@ -139,6 +171,7 @@ nice_names['ch4_c'] = 'Methane'
 nice_names['pop_density'] = 'Population Density'
 nice_names['pm10'] = 'Particulate matter 10um'
 nice_names['pm2p5'] = 'Particulate matter 2.5um'
+nice_names.update(census_var_dict)
 
 env_data = env_data.copy().dropna(axis=1, how='all')
 env_data = env_data.dropna()
@@ -225,11 +258,15 @@ def shap_plots(model, X_test, save_path, title):
     # feature_names = [nice_names[i] for i in X_test.columns]
     # print(feature_names)
     # feature_names = X_test.columns
+    # print("nice names: ", nice_names)
+    # print("X_test.columns", X_test.columns)
     feature_names = {i: nice_names[i] if i in nice_names.keys() else i for i in X_test.columns}
+    # print(feature_names)
     # print([(i,j,nice_names[j]) for i,j in  enumerate(feature_names)])
     # print(feature_names)
     # X_test = pd.DataFrame(X_test)
     X_test.columns = [i if i not in feature_names.keys() else feature_names[i] for i in feature_names]
+    # print(X_test.columns)
     # print(X_test.head)
     shap_values = explainer.shap_values(X_test)
     
@@ -376,7 +413,9 @@ def getDF(icd_codes): # this is the parallel function
         # "males college > 1yr, no degree","males associate degree", "SNAP eligibility",]]
         # X = X.dropna()
         # print(X.shape)
-        X = data_quality.drop(['quarter','PAT_ZIP','normalized','LandArea_sqm','ICD','population','pop_density']+env_labels,axis=1)
+
+        #X = data_quality.drop(['quarter','PAT_ZIP','normalized','LandArea_sqm','ICD','population','pop_density']+env_labels,axis=1)
+        X = data_quality.loc[:,suitable_env_vars+census_variables]
         # print(X)
 
 
@@ -389,13 +428,13 @@ def getDF(icd_codes): # this is the parallel function
         # for i in range(500):
         # print('before log10 normalized')
         y = np.log10(data_quality['normalized'])
-        print('after log10 normalized')
+        # print('after log10 normalized')
         # y = data_quality['normalized']
         # y = data_quality['ICD']
         # seed = 140
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) #, random_state=seed)
-        print('after train test split')
+        # print('after train test split')
 
         feature_scaler = MinMaxScaler()
         X_train_scaled = feature_scaler.fit_transform(X_train)
