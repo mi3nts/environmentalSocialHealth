@@ -73,10 +73,10 @@ census_var_dict = dict(zip([i for i in sorted(census_variables)], var_names))
 pandas_or_polars = False
 
 if pandas_or_polars:
-    icd_data = "../icd10_pandas/"
+    icd_data = "../icd10/"
     save_dir = 'pandas'
 else:
-    icd_data = '../icd10_polars/'
+    icd_data = '../icd10/'
     save_dir = 'polars'
 
 tx_zip = gpd.read_file(zip_2010)
