@@ -55,7 +55,7 @@ census_data['census_var'] = census_data.apply(modify_val, axis=1)
 census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] = census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]].mask(census_data.loc[census_data['census_var'].str.contains('B19013'),[str(i) for i in range(2000,2022)]] < 0, np.nan)
 census_data = census_data.fillna(0)
 # census_labels = census_data['census_var'].unique()
-census_variables = list(census_data['census_var'].unique())
+census_variables = sorted(list(census_data['census_var'].unique()))
 #census_variables = [f'{i}_002E' if i.startswith('B17020') else i for i in census_variables]
 # print(census_data.shape)
 # print(census_data.isna().sum())
@@ -63,21 +63,44 @@ census_variables = list(census_data['census_var'].unique())
 survey = 'ACSDT5Y2011'
 acs_conn = cenpy.remote.APIConnection(survey)
 acs_variables_df = acs_conn.variables
+# var_names = [f'{acs_variables_df.loc[i]["label"]}, {acs_variables_df.loc[i]["concept"]}' for i in census_variables]
+# var_names = [i.lower().replace('estimate!!total!!','').replace('!!',' - ') for i in var_names]
+# var_names = [i.replace('sex by educational attainment for the population 25 years and over','') for i in var_names]
+# var_names = [i.replace('income in the past 12 months below','') for i in var_names]
+# var_names = [i.replace('estimate - median household income in the past 12 months (in 2011 inflation-adjusted dollars)','') for i in var_names]
+
 var_names = [f'{acs_variables_df.loc[i]["label"]}, {acs_variables_df.loc[i]["concept"]}' for i in census_variables]
 var_names = [i.lower().replace('estimate!!total!!','').replace('!!',' - ') for i in var_names]
 var_names = [i.replace('sex by educational attainment for the population 25 years and over','') for i in var_names]
 var_names = [i.replace('income in the past 12 months below','') for i in var_names]
 var_names = [i.replace('estimate - median household income in the past 12 months (in 2011 inflation-adjusted dollars)','') for i in var_names]
-census_var_dict = dict(zip([i for i in sorted(census_variables)], var_names))
+var_names = [i.replace(' sex by age','') for i in var_names]
+var_names = [i.replace(", median household income in the past 12 months (in 2011 inflation-adjusted dollars)",'median household income in the past 12 months') for i in var_names]
+var_names = [i.replace(" poverty level, poverty status in the past 12 months by age ","below poverty level, past 12 months ") for i in var_names]
+census_var_dict = dict(zip([i for i in census_variables], var_names))
 
-pandas_or_polars = False
+male_vars = [i for i in var_names if re.match(r'male',i)]
+female_vars = [i for i in var_names if re.match(r'female',i)]
 
-if pandas_or_polars:
-    icd_data = "../icd10/"
-    save_dir = 'pandas'
-else:
-    icd_data = '../icd10/'
-    save_dir = 'polars'
+female_census_codes, male_census_codes = [], []
+for key, val in census_var_dict.items():
+    if val not in male_vars:
+        female_census_codes.append(key)
+    if val not in female_vars:
+        male_census_codes.append(key)
+
+# pandas_or_polars = False
+
+# if pandas_or_polars:
+#     icd_data = "../icd10/"
+#     save_dir = 'pandas'
+# else:
+#     icd_data = '../icd10/'
+#     save_dir = 'polars'
+
+data_for_model = 'female_all_ages'
+icd_data = f'../icd10_{data_for_model}/'
+save_dir = data_for_model
 
 tx_zip = gpd.read_file(zip_2010)
 tx_zip = tx_zip.rename(columns={
@@ -319,7 +342,8 @@ def plot_qq(full_pdf, save_path, title):
 #     plt.title(f'SHAP Values') 
 #     plt.show()
 nthresh = 3
-os.makedirs(f"../Results_nthresh_{nthresh}_{save_dir}", exist_ok=True)
+result_folder = f"Results_nthresh_{nthresh}_{save_dir}"
+os.makedirs(f"../{result_folder}", exist_ok=True)
 
 def getDF(icd_codes): # this is the parallel function
     fits_data = []
@@ -415,7 +439,10 @@ def getDF(icd_codes): # this is the parallel function
         # print(X.shape)
 
         #X = data_quality.drop(['quarter','PAT_ZIP','normalized','LandArea_sqm','ICD','population','pop_density']+env_labels,axis=1)
-        X = data_quality.loc[:,suitable_env_vars+census_variables]
+        if data_for_model == "female_all_ages":
+            X = data_quality.loc[:,suitable_env_vars+female_census_codes]
+        elif data_for_model == 'male_all_ages':
+            X = data_quality.loc[:,suitable_env_vars+male_census_codes]
         # print(X)
 
 
@@ -568,4 +595,58 @@ for i in range(42):
             result.to_csv(f"../Results_nthresh_{nthresh}_{save_dir}/multiprocess_df_{i}.csv")
 
 
+def getFileList(folder):
+    file_list = [folder+'/'+i for i in os.listdir(folder)]
+    file_list = sorted(file_list, key=numerical_sort)
 
+    return file_list
+
+def results(file_list):
+    results_df = pd.DataFrame()
+    for file in file_list:
+        df = pd.read_csv(file)
+        df = df.iloc[:, 1:]
+        results_df = pd.concat([results_df, df])
+
+    return results_df.sort_values(by='test_r2', ascending=False)
+
+def getResultDF(path, r2_thresh = 0.5):
+    files = getFileList(path)
+    results_df = results(files)
+    results_df = results_df.sort_values(by=['numDataPoints','test_r2'], ascending=[False, False])
+    results_df = results_df[results_df['test_r2'] > 0.5].reset_index(drop=True)
+
+    return results_df
+
+# Define the ICD-10-CM major categories mapping
+icd_categories = {
+    'A': 'Infectious and Parasitic Diseases',
+    'B': 'Infectious and Parasitic Diseases',
+    'C': 'Neoplasms',
+    'D': 'Diseases of the Blood and Blood-Forming Organs',
+    'E': 'Endocrine, Nutritional, and Metabolic Diseases',
+    'F': 'Mental, Behavioral, and Neurodevelopmental Disorders',
+    'G': 'Diseases of the Nervous System',
+    'H': 'Diseases of the Eye and Adnexa',
+    'I': 'Diseases of the Circulatory System',
+    'J': 'Diseases of the Respiratory System',
+    'K': 'Diseases of the Digestive System',
+    'L': 'Diseases of the Skin and Subcutaneous Tissue',
+    'M': 'Diseases of the Musculoskeletal System and Connective Tissue',
+    'N': 'Diseases of the Genitourinary System',
+    'O': 'Pregnancy, Childbirth, and the Puerperium',
+    'P': 'Certain Conditions Originating in the Perinatal Period',
+    'Q': 'Congenital Malformations, Deformations, and Chromosomal Abnormalities',
+    'R': 'Symptoms, Signs, and Abnormal Clinical and Laboratory Findings',
+    'S': 'Injury, Poisoning, and Certain Other Consequences of External Causes',
+    'T': 'Injury, Poisoning, and Certain Other Consequences of External Causes',
+    'V': 'External Causes of Morbidity',
+    'Y': 'External Causes of Morbidity',
+    'Z': 'Factors Influencing Health Status and Contact with Health Services'
+}
+
+# result_folder = 'Results_nthresh_3_female_all_ages'
+pandas_results_df = getResultDF(f'../{result_folder}')
+pandas_results_df['code_category'] = [icd_categories.get(i[0], 'Unknown Category') for i in list(pandas_results_df.ICD)]
+pandas_results_df['code_label'] = [cm.get_description(i) if cm.is_valid_item(i) else "Unknown Code" for i in list(pandas_results_df.ICD)]
+pandas_results_df.to_csv(f'../{result_folder}/{result_folder}.csv',index=False)
