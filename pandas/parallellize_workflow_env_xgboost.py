@@ -532,8 +532,8 @@ def getDF(icd_codes): # this is the parallel function
         # print('full pdf', len(full_pdf))
         # print('full pdf', len(full_pdf))
         test_train_plot(full_pdf, y_test, train_r2, y_train, X_train_scaled, test_r2, X_test_scaled,
-                        title=textwrap.fill(f"ICD-10 Codes for {icd_code_title}, \n # threshold = {nthresh}, \
-                        Environmental data, \n from {start_year} to {end_year-1}"),
+                        title=textwrap.fill(f"ICD-10 Codes for {icd_code_title}, # threshold = {nthresh}, \
+                        Environmental and Social data, from {start_year} to {end_year-1}"),
                         save_path=f'../Plots_{save_dir}/{icd_code}/{icd_code}_r2.png'
                         )
 
